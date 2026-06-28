@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home - Classroom</title>
+        <link rel="icon" type="image/x-icon" href="logo.ico">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #ffffff;
+            color: #000000;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 2.5rem;
+            letter-spacing: -1px;
+        }
+
+        .toolbar {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 30px;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .search-bar {
+            width: 100%;
+            padding: 12px 16px;
+            font-size: 16px;
+            border: 2px solid #000000;
+            border-radius: 4px;
+            outline: none;
+        }
+
+        .soundboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 25px;
+            width: 100%;
+            padding-bottom: 50px;
+        }
+
+        .sound-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            border: 1px solid #e0e0e0;
+            padding: 15px 10px;
+            border-radius: 6px;
+            background: #fafafa;
+            position: relative;
+        }
+
+        .sound-item.hidden {
+            display: none !important;
+        }
+
+        .sound-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 0;
+            outline: none;
+            width: 120px;
+            height: 120px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .sound-btn img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            user-select: none;
+            -webkit-user-drag: none;
+            transition: transform 0.05s linear;
+        }
+
+        /* 10px downward shift visual effect when audio is playing */
+        .sound-item.playing .sound-btn img {
+            transform: translateY(10px);
+        }
+
+        .sound-name {
+            margin-top: 10px;
+            font-size: 15px;
+            font-weight: bold;
+            text-align: center;
+            word-break: break-word;
+        }
+
+        /* Action Buttons Panel */
+        .action-panel {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 12px;
+            width: 100%;
+        }
+
+        .action-btn {
+            background: #ffffff;
+            border: 1px solid #000000;
+            border-radius: 4px;
+            padding: 6px 10px;
+            font-size: 12px;
+            cursor: pointer;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .action-btn:hover {
+            background: #eeeeee;
+        }
+
+        .fav-btn.is-fav {
+            background: #ffeb3b;
+            border-color: #fbc02d;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Soundboard</h1>
+    
+    <div class="toolbar">
+        <input type="text" id="search-input" class="search-bar" placeholder="Search sounds...">
+    </div>
+
+    <div class="soundboard-grid" id="grid">
+        </div>
+
+<script>
+    // ==========================================
+    // 1. DATA TABLE
+    // ==========================================
+    const soundData = [
+        { name: "hub",              filePath: "sounds/hub.mp3" },
+        { name: "coc",              filePath: "sounds/clash_of_clans.mp3" },
+        { name: "fah",              filePath: "sounds/fah.mp3" },
+        { name: "fortnite",         filePath: "sounds/fortnite.mp3" },
+        { name: "fbi open up",      filePath: "sounds/fbi_open_up.mp3" },
+        { name: "bugatti",          filePath: "sounds/bugatti.mp3" },
+        { name: "cool",             filePath: "sounds/cool.mp3" },
+        { name: "emotional damage", filePath: "sounds/emotional_damage.mp3" },
+        { name: "fart",             filePath: "sounds/fart.mp3" },
+        { name: "gangsters paradise",filePath: "sounds/gangster_paradise.mp3" },
+        { name: "get out",             filePath: "sounds/getout.mp3" },       
+        { name: "gorilla tag",             filePath: "sounds/gtag.mp3" },
+        { name: "gulp gulp gulp",             filePath: "sounds/gulpgulp.mp3" },
+        { name: "haha",             filePath: "sounds/haha.mp3" },
+        { name: "helicopter",             filePath: "sounds/helicopter.mp3" },
+        { name: "helppp",             filePath: "sounds/helpp.mp3" },
+        { name: "heyyy",             filePath: "sounds/heyyy.mp3" },
+        { name: "hogrider",             filePath: "sounds/hogrider.mp3" },
+        { name: "i live with roaches",             filePath: "sounds/i_live_with_roaches.mp3" },
+        { name: "indian",             filePath: "sounds/indian.mp3" },
+        { name: "jaden",             filePath: "sounds/jaden.mp3" },
+        { name: "john cena",             filePath: "sounds/john_cena.mp3" },
+        { name: "kahoot",             filePath: "sounds/kahoot.mp3" },
+        { name: "looking for a job",             filePath: "sounds/looking_for_a_job.mp3" },
+        { name: "latina",             filePath: "sounds/latina.mp3" },
+        { name: "sturdy",             filePath: "sounds/sturdy.mp3" },
+        { name: "banana",             filePath: "sounds/banana.mp3" },
+
+
+
+
+
+    ];
+
+    // ==========================================
+    // 2. IMAGE PATHS
+    // ==========================================
+    const buttonImages = {
+        idle: "red.png"
+    };
+
+    // ==========================================
+    // 3. CODE LOGIC
+    // ==========================================
+    const grid = document.getElementById('grid');
+    const searchInput = document.getElementById('search-input');
+
+    soundData.forEach((sound) => {
+        const itemDiv = document.createElement('div');
+        itemDiv.className = 'sound-item';
+
+        const btn = document.createElement('button');
+        btn.className = 'sound-btn';
+
+        const img = document.createElement('img');
+        img.src = buttonImages.idle || "https://via.placeholder.com/120"; 
+        img.alt = sound.name;
+
+        const nameLabel = document.createElement('div');
+        nameLabel.className = 'sound-name';
+        nameLabel.innerText = sound.name;
+
+        // Action Panel (Pause, Fav, Download)
+        const actionPanel = document.createElement('div');
+        actionPanel.className = 'action-panel';
+
+        const pauseBtn = document.createElement('button');
+        pauseBtn.className = 'action-btn';
+        pauseBtn.innerText = "⏸ Pause All";
+
+        const favBtn = document.createElement('button');
+        favBtn.className = 'action-btn fav-btn';
+        favBtn.innerText = "⭐ Fav";
+
+        const dlBtn = document.createElement('button');
+        dlBtn.className = 'action-btn';
+        dlBtn.innerText = "💾 DL";
+
+        actionPanel.appendChild(pauseBtn);
+        actionPanel.appendChild(favBtn);
+        actionPanel.appendChild(dlBtn);
+
+        btn.appendChild(img);
+        itemDiv.appendChild(btn);
+        itemDiv.appendChild(nameLabel);
+        itemDiv.appendChild(actionPanel);
+        grid.appendChild(itemDiv);
+
+        // Keep track of all active audio instances playing for this specific button
+        let activeAudios = [];
+
+        // Main Play Button Functionality (Spammable Overlapping Mode)
+        btn.addEventListener('click', () => {
+            const audioInstance = new Audio(sound.filePath);
+            activeAudios.push(audioInstance);
+
+            // Turn on visual button press effect
+            itemDiv.classList.add('playing');
+
+            audioInstance.play().catch(err => console.log("Playback error: Check your sound file paths."));
+
+            // Remove track from active list and update button appearance when finished
+            audioInstance.addEventListener('ended', () => {
+                activeAudios = activeAudios.filter(a => a !== audioInstance);
+                if (activeAudios.length === 0) {
+                    itemDiv.classList.remove('playing');
+                }
+            });
+        });
+
+        // Pause Button Functionality (Clears out all playing versions of this sound)
+        pauseBtn.addEventListener('click', () => {
+            activeAudios.forEach(audio => audio.pause());
+            activeAudios = [];
+            itemDiv.classList.remove('playing');
+        });
+
+        // Favourite Button Functionality
+        favBtn.addEventListener('click', () => {
+            favBtn.classList.toggle('is-fav');
+        });
+
+        // Download Button Functionality
+        dlBtn.addEventListener('click', () => {
+            const a = document.createElement('a');
+            a.href = sound.filePath;
+            a.download = sound.name || 'sound';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        });
+
+        itemDiv.dataset.name = sound.name.toLowerCase();
+    });
+
+    // Search Logic
+    searchInput.addEventListener('input', (e) => {
+        const query = e.target.value.toLowerCase().trim();
+        const items = grid.querySelectorAll('.sound-item');
+        
+        items.forEach(item => {
+            if (item.dataset.name.includes(query)) {
+                item.classList.remove('hidden');
+            } else {
+                item.classList.add('hidden');
+            }
+        });
+    });
+</script>
+
+</body>
+</html>
